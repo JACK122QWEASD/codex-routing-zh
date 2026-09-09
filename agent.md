@@ -37,7 +37,7 @@
 
 **第 3 问**（先探测再问，**不要预设模型名**）：
 
-> ⚠️ **不要假设用户用的是哪家模型。** 强档是他当前会话的模型（可能是 DeepSeek、GPT、Claude 任意一家），
+> ⚠️ **不要假设用户用的是哪家模型。** 强档是他当前会话的模型（任何一家都有可能），
 > 弱档更是五花八门。第 3 问必须先探测；探测不到就**主动问**——尤其第一次启用时，
 > 用户很可能压根没配弱模型 API。这时默默降级成"全部我来做"是错的，会把省钱的大头悄悄吞掉。
 
@@ -72,11 +72,8 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
    成本和耗时会明显上升（实测弱档能省 87%）。
 
 你有可用的便宜模型 API 吗？
-   1) 火山方舟 GLM（ark.cn-beijing.volces.com）
-   2) DeepSeek（api.deepseek.com）
-   3) 其他 —— 告诉我端点和环境变量名
-   （1、2 只是举例，任何提供 Chat Completions 的厂商都行）
-   4) 本轮不用弱档，全部我做
+   1) 有 —— 给我三样：端点 URL、模型名、API Key
+   2) 没有 / 本轮不用弱档，全部我做
 
 选 1–3 的话，把 API Key 给我（或者说它存在哪个环境变量里），
 我写入 ~/.codex/config.toml（权限 600）后用 canary 探测验证。
@@ -105,11 +102,11 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 
 | # | 子任务 | 难度分 | 等级 | 路由模型 | 并行组 | 依赖 |
 |---|--------|--------|------|----------|--------|------|
-| 1 | 把 utils.ts 里 3 个函数改驼峰 | 14 | L1 | glm-5-2-260617 | G1 | -   |
-| 2 | 补 foo() 的 JSDoc              | 11 | L1 | glm-5-2-260617 | G1 | -   |
-| 3 | 为 AuthService 写单测          | 30 | L2 | glm-5-2-260617 | G1 | -   |
+| 1 | 把 utils.ts 里 3 个函数改驼峰 | 14 | L1 | 弱档 | G1 | -   |
+| 2 | 补 foo() 的 JSDoc              | 11 | L1 | 弱档 | G1 | -   |
+| 3 | 为 AuthService 写单测          | 30 | L2 | 弱档 | G1 | -   |
 | 4 | 修登录态跨模块 bug             | 47 | L3 | 升给强档        | G2 | 1,3 |
-| 5 | 改 session 接口契约            | 68 | L4 | deepseek-v4-pro | G3 | 4   |
+| 5 | 改 session 接口契约            | 68 | L4 | 强档 | G3 | 4   |
 
 汇总：5 个子任务 ｜ 强 1 ｜ 中 1 ｜ 弱 3 ｜ 并行组 3
 预计：G1 三任务并行 ≈ 单次调用耗时；G2、G3 串行
@@ -153,10 +150,10 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 {
   "mode_on": true,
   "granularity": "中",
-  "strong_model": "deepseek-v4-pro",
-  "strong_endpoint": "https://api.deepseek.com/v1",
-  "cheap_model": "glm-5-2-260617",
-  "cheap_endpoint": "https://ark.cn-beijing.volces.com/api/v3",
+  "strong_model": "<你的强模型名>",
+  "strong_endpoint": "<你的强模型端点>",
+  "cheap_model": "<你的弱模型名>",
+  "cheap_endpoint": "<你的弱模型端点>",
   "cheap_no_think": true,
   "mid_model": null,
   "last_updated": "2026-09-08"
@@ -171,22 +168,22 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 
 | 档位 | 承接 | 当前配置 | 通道 | 协议 |
 |---|---|---|---|---|
-| **S 强** | L4 / L5 | **DeepSeek v4-pro** | Codex 主会话，带完整工具权限 | Responses |
+| **S 强** | L4 / L5 | **强档（当前会话模型）** | Codex 主会话，带完整工具权限 | Responses |
 | **M 中** | L3 | 未配置 → 升给 S（但见下方下放规则） | — | — |
 
 **L3 编码任务可以下放给弱档**——实测 9 道编程题，弱档 8/9、强档 8/9，正确率持平，
 但弱档快 2.7 倍、省 87%。下放条件：**单函数/单类 + 输入输出明确 + 上下文能一次贴全**。
 （不下的：跨文件协调、需要设计决策、上下文要它自己探索。详见 `rubric.md` §六。）
-| **W 弱** | L1 / L2 | **GLM-5.2（火山方舟）** | 直连 HTTP，不经 Codex | Chat Completions |
+| **W 弱** | L1 / L2 | **弱档（你配的便宜模型）** | 直连 HTTP，不经 Codex | Chat Completions |
 
-> **为什么 W 档必须绕开 Codex**：火山方舟只提供 Chat Completions，而 Codex 只说 Responses 协议，
+> **为什么 W 档必须绕开 Codex**：多数便宜模型厂商只提供 Chat Completions，而 Codex 只说 Responses 协议，
 > 接进去会直接 404/空流。绕开既省钱，也顺带绕开了协议限制。
 > 当前值记在 `.route-state.json`，改模型只动那一个文件。
 
 > ⚠️ **S 档就是你自己**（config.toml 的默认模型），由主会话直接承担——
 > **不需要检查任何环境变量，不需要 shell 调用，不存在"强档密钥未配置"这回事**。
-> 实测踩过：桌面端把"S 档"误判为需要 shell 调 API，检查 `DEEPSEEK_API_KEY` 后错误地宣布密钥缺失、全量转兜底。
-> 判定"通道不可用"之前，先想清楚：只有 **W 档**才需要密钥（GLM 的 key 会自动从 `config.toml` 的 bearer_token 回退读取，见 `weak-channel.md`）。
+> 实测踩过：桌面端把"S 档"误判为需要 shell 调 API，检查强档的环境变量后错误地宣布密钥缺失、全量转兜底。
+> 判定"通道不可用"之前，先想清楚：只有 **W 档**才需要密钥（会从 `config.toml` 对应 provider 的 bearer_token 自动回退读取，见 `weak-channel.md`）。
 
 ### 2.1 当前选定的模型
 
@@ -195,9 +192,9 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 
 | 档 | 模型（示例） | 厂商端点（示例） | 说明 |
 |---|---|---|---|
-| **S 强** | `deepseek-v4-pro` | `https://api.deepseek.com/v1` | 实测跑通；换 GPT / Claude 同理 |
+| **S 强** | `<你的强模型名>` | `<你的强模型端点>` | 需支持 Responses 协议 |
 | **M 中** | 未配置 | — | L3 编码任务可下放弱档（见 §2 下放规则） |
-| **W 弱** | `glm-5-2-260617` | `https://ark.cn-beijing.volces.com/api/v3` | 实测跑通；**推理模型须关思考** |
+| **W 弱** | `<你的弱模型名>` | `<你的弱模型端点>` | 只需 Chat Completions；**推理模型须关思考** |
 
 **W 档的三条硬约束**（违反即视为路由失败）：
 1. 只做纯文本变换，输入必须贴全（把相关代码/文本直接放进 prompt），不许它碰文件系统。
@@ -298,13 +295,13 @@ done
 
 | 档 | 并行度上限 | 实测依据 |
 |---|---|---|
-| **W 弱** | **10** | GLM 并发 5 / 8 / 12 的耗时是 5.64s / 4.93s / 4.97s，**吞吐线性上升、零失败**——12 都还没到瓶颈。设 10 是留安全余量。旧规则设 5 明显太保守。 |
-| **S 强** | **3** | v4-pro 实测并发**反而变慢**（限流），必须留余量。 |
+| **W 弱** | **10** | 弱档并发 5 / 8 / 12 的耗时是 5.64s / 4.93s / 4.97s，**吞吐线性上升、零失败**——12 都还没到瓶颈。设 10 是留安全余量。旧规则设 5 明显太保守。 |
+| **S 强** | **3** | 强档实测并发**反而变慢**（限流），必须留余量。 |
 - 难度分越高越不该并行（越容易出问题，返工成本高）。L4/L5 一律串行。
 
 ### 5.1 批量派发：**所有 W 档子任务必须一次性派发，禁止逐个派发**
 
-> **这是性能的第一杠杆。** 实测：强档（v4-pro）在 agent 框架里一轮决策约 **6 秒**，
+> **这是性能的第一杠杆。** 实测：强档在 agent 框架里一轮决策约 **6 秒**，
 > 弱档并行跑 3 个子任务只要 **2.65 秒**。逐个派发时 N 个子任务 = N 轮强档推理；
 > 一轮真实任务跑出 7 分钟，绝大部分是强档在"派发→等待→查看→再派发"上空转。
 
