@@ -10,3 +10,6 @@ playground/
 .workbuddy/
 .idea/
 .DS_Store
+
+# 由 install.sh 生成（软链，不跨平台）
+AGENTS.md
