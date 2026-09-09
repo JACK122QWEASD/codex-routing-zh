@@ -1,0 +1,12 @@
+.scratch/
+
+# 测试产物
+playground/
+
+# 个人配置（用 examples/ 里的模板生成）
+.route-state.json
+
+# WorkBuddy / 编辑器数据
+.workbuddy/
+.idea/
+.DS_Store

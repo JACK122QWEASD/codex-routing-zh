@@ -1,0 +1,11 @@
+{
+  "mode_on": true,
+  "granularity": "中",
+  "strong_model": "deepseek-v4-pro",
+  "strong_endpoint": "https://api.deepseek.com/v1",
+  "cheap_model": "glm-5-2-260617",
+  "cheap_endpoint": "https://ark.cn-beijing.volces.com/api/v3",
+  "cheap_no_think": true,
+  "mid_model": null,
+  "last_updated": "2026-09-09"
+}
