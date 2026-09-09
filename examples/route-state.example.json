@@ -1,11 +1,11 @@
 {
   "mode_on": true,
   "granularity": "中",
-  "strong_model": "<你的强模型名>",
-  "strong_endpoint": "<你的强模型端点>/v1",
-  "cheap_model": "<你的弱模型名>",
-  "cheap_endpoint": "<你的弱模型端点>/v1",
-  "cheap_provider": "your-cheap",
+  "strong_model": "chatgpt",
+  "strong_endpoint": "https://api.openai.com/v1",
+  "cheap_model": "glm",
+  "cheap_endpoint": "https://open.bigmodel.cn/api/paas/v4",
+  "cheap_provider": "glm",
   "cheap_no_think": true,
   "mid_model": null,
   "last_updated": "2026-09-09"

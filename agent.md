@@ -72,7 +72,7 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
    成本和耗时会明显上升（实测弱档能省 87%）。
 
 你有可用的便宜模型 API 吗？
-   1) 有 —— 给我三样：端点 URL、模型名、API Key
+   1) 有 —— 给我端点、模型名、API Key（例如强档用 ChatGPT、弱档用 GLM，也可以是别的）
    2) 没有 / 本轮不用弱档，全部我做
 
 选 1–3 的话，把 API Key 给我（或者说它存在哪个环境变量里），
@@ -102,11 +102,11 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 
 | # | 子任务 | 难度分 | 等级 | 路由模型 | 并行组 | 依赖 |
 |---|--------|--------|------|----------|--------|------|
-| 1 | 把 utils.ts 里 3 个函数改驼峰 | 14 | L1 | 弱档 | G1 | -   |
-| 2 | 补 foo() 的 JSDoc              | 11 | L1 | 弱档 | G1 | -   |
-| 3 | 为 AuthService 写单测          | 30 | L2 | 弱档 | G1 | -   |
+| 1 | 把 utils.ts 里 3 个函数改驼峰 | 14 | L1 | GLM | G1 | -   |
+| 2 | 补 foo() 的 JSDoc              | 11 | L1 | GLM | G1 | -   |
+| 3 | 为 AuthService 写单测          | 30 | L2 | GLM | G1 | -   |
 | 4 | 修登录态跨模块 bug             | 47 | L3 | 升给强档        | G2 | 1,3 |
-| 5 | 改 session 接口契约            | 68 | L4 | 强档 | G3 | 4   |
+| 5 | 改 session 接口契约            | 68 | L4 | ChatGPT | G3 | 4   |
 
 汇总：5 个子任务 ｜ 强 1 ｜ 中 1 ｜ 弱 3 ｜ 并行组 3
 预计：G1 三任务并行 ≈ 单次调用耗时；G2、G3 串行
@@ -150,10 +150,10 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 {
   "mode_on": true,
   "granularity": "中",
-  "strong_model": "<你的强模型名>",
-  "strong_endpoint": "<你的强模型端点>",
-  "cheap_model": "<你的弱模型名>",
-  "cheap_endpoint": "<你的弱模型端点>",
+  "strong_model": "chatgpt",
+  "strong_endpoint": "https://api.openai.com/v1",
+  "cheap_model": "glm",
+  "cheap_endpoint": "https://open.bigmodel.cn/api/paas/v4",
   "cheap_no_think": true,
   "mid_model": null,
   "last_updated": "2026-09-08"
@@ -192,9 +192,9 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 
 | 档 | 模型（示例） | 厂商端点（示例） | 说明 |
 |---|---|---|---|
-| **S 强** | `<你的强模型名>` | `<你的强模型端点>` | 需支持 Responses 协议 |
+| **S 强** | `chatgpt` | `https://api.openai.com/v1` | 示例值；需支持 Responses 协议 |
 | **M 中** | 未配置 | — | L3 编码任务可下放弱档（见 §2 下放规则） |
-| **W 弱** | `<你的弱模型名>` | `<你的弱模型端点>` | 只需 Chat Completions；**推理模型须关思考** |
+| **W 弱** | `glm` | `https://open.bigmodel.cn/api/paas/v4` | 示例值；只需 Chat Completions；**推理模型须关思考** |
 
 **W 档的三条硬约束**（违反即视为路由失败）：
 1. 只做纯文本变换，输入必须贴全（把相关代码/文本直接放进 prompt），不许它碰文件系统。

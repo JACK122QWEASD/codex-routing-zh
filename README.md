@@ -30,7 +30,7 @@ just as well.
 | OS | Unix shell — scripts use `grep` / `sed` / `chmod`. Windows: use WSL |
 | Python | 3.7+ (JSON assembly only; **no `tomllib` dependency**) |
 | Node | Optional, for `node --check` / `node --test` verification |
-| Cheap model | Anything with a Chat Completions endpoint |
+| Cheap model | Anything with a Chat Completions endpoint (GLM in the examples) |
 
 Every model name and endpoint in this repo is an **example**. The rules are vendor-agnostic.
 
@@ -52,15 +52,18 @@ any directory) and generates `.route-state.json` and `~/.codex/config.toml` from
 Edit `~/.codex/config.toml`:
 
 ```toml
-model = "your-strong-model"
-model_provider = "your-provider"
+model = "chatgpt"
+model_provider = "openai"
 
-[model_providers.your-provider]
-name = "Strong"
-base_url = "https://your-endpoint/v1"
-env_key = "YOUR_API_KEY"
+[model_providers.openai]
+name = "ChatGPT (strong)"
+base_url = "https://api.openai.com/v1"
+env_key = "OPENAI_API_KEY"
 ```
 
+> These are **sample values** (ChatGPT strong / GLM cheap). Copy them to get running,
+then swap in your own.
+>
 > Never commit a key to this repo. Use `env_key` with an environment variable, or put it in
 > `~/.codex/config.toml` with `chmod 600` — that file is outside version control.
 
@@ -142,8 +145,8 @@ One file, `.route-state.json`:
 
 ```json
 {
-  "strong_model": "your-strong-model",
-  "cheap_model": "your-cheap-model",
+  "strong_model": "chatgpt",
+  "cheap_model": "glm",
   "cheap_no_think": true
 }
 ```

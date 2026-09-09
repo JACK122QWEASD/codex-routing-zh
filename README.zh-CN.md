@@ -27,7 +27,7 @@
 | 系统 | 脚本用了 `grep` / `sed` / `chmod`，需 Unix 环境（macOS / Linux）。Windows 请走 WSL |
 | Python | 3.7+（只用于拼 JSON，**不依赖 tomllib**） |
 | Node | 可选，用于 `node --check` / `node --test` 做校验 |
-| 弱模型 | 任意提供 Chat Completions API 的厂商都行 |
+| 弱模型 | 任意提供 Chat Completions API 的厂商都行（示例用 GLM） |
 
 > 项目里的模型名、端点都是**示例值**，换成你自己的即可，规则本身与厂商无关。
 
@@ -50,15 +50,17 @@ cd codex-routing
 编辑 `~/.codex/config.toml`，填你自己的模型端点和密钥：
 
 ```toml
-model = "你的强模型名"
-model_provider = "your-provider"
+model = "chatgpt"
+model_provider = "openai"
 
-[model_providers.your-provider]
-name = "强模型"
-base_url = "https://你的端点/v1"
-env_key = "YOUR_STRONG_API_KEY"
+[model_providers.openai]
+name = "ChatGPT (强)"
+base_url = "https://api.openai.com/v1"
+env_key = "OPENAI_API_KEY"
 ```
 
+> 上面是**示例值**（强档 ChatGPT / 弱档 GLM），第一次用可以直接照抄跑通，之后换成你自己的。
+> 
 > **密钥不要写进本仓库。** 用 `env_key` 走环境变量，或写在 `~/.codex/config.toml`（权限 600，不进版本库）。
 
 ### 3. 用
@@ -137,8 +139,8 @@ install.sh          安装脚本
 
 ```json
 {
-  "strong_model": "你的强模型名",
-  "cheap_model": "你的弱模型名",
+  "strong_model": "chatgpt",
+  "cheap_model": "glm",
   "cheap_no_think": true
 }
 ```
