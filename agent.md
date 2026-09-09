@@ -75,6 +75,7 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
    1) 火山方舟 GLM（ark.cn-beijing.volces.com）
    2) DeepSeek（api.deepseek.com）
    3) 其他 —— 告诉我端点和环境变量名
+   （1、2 只是举例，任何提供 Chat Completions 的厂商都行）
    4) 本轮不用弱档，全部我做
 
 选 1–3 的话，把 API Key 给我（或者说它存在哪个环境变量里），
@@ -94,6 +95,7 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 ### 第 4 步：接到具体任务后，先展示方案再动手
 
 **不允许直接开干**，必须先输出方案：
+（下面表格里的模型名是**示例**，实际填你第 3 问探测到的）
 
 ```
 【任务分配方案】
@@ -127,7 +129,7 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 ```
 【本次配置】来自 .route-state.json
    模型配合模式 ｜ 颗粒度：中
-   强档：deepseek-v4-pro ｜ 弱档：glm-5-2-260617
+   强档：<当前会话模型> ｜ 弱档：<探测到的弱档模型>
    （要改：编辑 .route-state.json，或改用交互模式重跑）
 ```
 2. **分配方案表格照常输出**，一步都不能省（表格格式同「第 4 步」）。
