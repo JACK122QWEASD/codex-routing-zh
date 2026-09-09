@@ -27,7 +27,7 @@
 | 系统 | 脚本用了 `grep` / `sed` / `chmod`，需 Unix 环境（macOS / Linux）。Windows 请走 WSL |
 | Python | 3.7+（只用于拼 JSON，**不依赖 tomllib**） |
 | Node | 可选，用于 `node --check` / `node --test` 做校验 |
-| 弱模型 | 任意提供 Chat Completions 的厂商（火山方舟 / DeepSeek / 智谱 / 百炼…都行） |
+| 弱模型 | 任意提供 Chat Completions API 的厂商都行 |
 
 > 项目里的模型名、端点都是**示例值**，换成你自己的即可，规则本身与厂商无关。
 
@@ -50,13 +50,13 @@ cd codex-routing
 编辑 `~/.codex/config.toml`，填你自己的模型端点和密钥：
 
 ```toml
-model = "deepseek-v4-pro"
-model_provider = "deepseek"
+model = "你的强模型名"
+model_provider = "your-provider"
 
-[model_providers.deepseek]
-name = "DeepSeek (强)"
-base_url = "https://api.deepseek.com/v1"
-env_key = "DEEPSEEK_API_KEY"
+[model_providers.your-provider]
+name = "强模型"
+base_url = "https://你的端点/v1"
+env_key = "YOUR_STRONG_API_KEY"
 ```
 
 > **密钥不要写进本仓库。** 用 `env_key` 走环境变量，或写在 `~/.codex/config.toml`（权限 600，不进版本库）。
@@ -137,15 +137,15 @@ install.sh          安装脚本
 
 ```json
 {
-  "strong_model": "deepseek-v4-pro",
-  "cheap_model": "glm-5-2-260617",
+  "strong_model": "你的强模型名",
+  "cheap_model": "你的弱模型名",
   "cheap_no_think": true
 }
 ```
 
 注意事项：
 - **强档必须支持 Responses 协议**（Codex 0.122+ 只认它）
-- **弱档走直连 HTTP**，只需 Chat Completions——所以火山方舟、智谱这类都能用
+- **弱档走直连 HTTP**，只需 Chat Completions——所以任何厂商都能接
 - 弱档如果是推理模型，**必须关思考**（`cheap_no_think: true`），否则 88% 的 token 烧在推理上
 
 ---
