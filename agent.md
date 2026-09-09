@@ -145,7 +145,7 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 
 ## 1. 状态持久化
 
-每次配置确认后写入项目根的 `.route-state.json`：
+每次配置确认后写入项目根的 `.route-state.json`（下面是**示例结构**，值以你的实际配置为准）：
 
 ```json
 {
@@ -188,11 +188,14 @@ grep -A3 'model_providers' ~/.codex/config.toml | grep -E 'base_url|env_key|bear
 
 ### 2.1 当前选定的模型
 
-| 档 | 模型 | 厂商端点 | 状态 |
+> ⚠️ **下表是示例值**（本项目实测通过的一组搭配）。你的实际配置以 `.route-state.json` 为准——
+> 第 3 问探测到什么就是什么，**不要照抄这张表**。换任何一家厂商都不影响规则本身。
+
+| 档 | 模型（示例） | 厂商端点（示例） | 说明 |
 |---|---|---|---|
-| **S 强** | `deepseek-v4-pro` | `https://api.deepseek.com/v1` | ✅ 已实测跑通 |
-| **M 中** | 未配置 | — | L3 一律升给 S |
-| **W 弱** | `glm-5-2-260617` | `https://ark.cn-beijing.volces.com/api/v3` | ✅ 已实测跑通（**须关思考**） |
+| **S 强** | `deepseek-v4-pro` | `https://api.deepseek.com/v1` | 实测跑通；换 GPT / Claude 同理 |
+| **M 中** | 未配置 | — | L3 编码任务可下放弱档（见 §2 下放规则） |
+| **W 弱** | `glm-5-2-260617` | `https://ark.cn-beijing.volces.com/api/v3` | 实测跑通；**推理模型须关思考** |
 
 **W 档的三条硬约束**（违反即视为路由失败）：
 1. 只做纯文本变换，输入必须贴全（把相关代码/文本直接放进 prompt），不许它碰文件系统。

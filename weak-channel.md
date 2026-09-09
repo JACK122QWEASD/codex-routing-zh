@@ -4,16 +4,24 @@
 > 已用真实火山方舟 API 实测通过。
 
 ```bash
-# 当前弱模型：GLM-5.2（火山方舟）
-export WEAK_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
-export WEAK_MODEL="glm-5-2-260617"
-export WEAK_NO_THINK=1                         # ⚠️ 别删，换成非推理模型时置空
+# ── 配置：从 .route-state.json 读取，不要硬编码厂商 ──────────────
+# 这样换任何一家（火山 / DeepSeek / 智谱 / 百炼）都不用改脚本
+ROOT="${ROOT:-$PWD}"                             # 默认当前目录，也可显式指定
+STATE="$ROOT/.route-state.json"
 
-# 密钥：优先环境变量；桌面端从 Dock 启动读不到 shell 变量，
-# 自动回退到 ~/.codex/config.toml 里的 bearer_token（单一事实来源）。
-# ⚠️ 用纯 shell 提取，不用 python tomllib——系统自带 python3 是 3.9，没有 tomllib（实测踩过）
-if [ -z "$ARK_API_KEY" ]; then
-  ARK_API_KEY=$(grep -A5 'model_providers.volcengine' "$HOME/.codex/config.toml" \
+WEAK_BASE_URL=$(grep -m1 '"cheap_endpoint"' "$STATE" | sed 's/.*: *"//; s/".*//')
+WEAK_MODEL=$(grep -m1 '"cheap_model"'       "$STATE" | sed 's/.*: *"//; s/".*//')
+WEAK_PROVIDER=$(grep -m1 '"cheap_provider"' "$STATE" | sed 's/.*: *"//; s/".*//')
+export WEAK_BASE_URL WEAK_MODEL
+
+# 关思考：推理模型必须关（实测省 88%），非推理模型置空即可
+export WEAK_NO_THINK=1
+
+# 密钥：优先环境变量；桌面端从 Dock 启动读不到 shell 变量时，
+# 回退到 ~/.codex/config.toml 里对应 provider 的 bearer_token。
+# ⚠️ 用纯 shell 提取，不用 python tomllib——很多系统的 python3 是 3.9，没有 tomllib（实测踩过）
+if [ -z "$WEAK_API_KEY" ]; then
+  WEAK_API_KEY=$(grep -A5 "model_providers.$WEAK_PROVIDER" "$HOME/.codex/config.toml" \
     | grep 'experimental_bearer_token' | sed 's/.*= *"//; s/"$//')
 fi
 
@@ -30,7 +38,7 @@ if os.environ.get('WEAK_NO_THINK'):
 print(json.dumps(p))
 ") || return 1
   curl -sS --max-time 60 "$WEAK_BASE_URL/chat/completions" \
-    -H "Authorization: Bearer $ARK_API_KEY" \
+    -H "Authorization: Bearer $WEAK_API_KEY" \
     -H "Content-Type: application/json" -d "$payload" \
   | python3 -c "
 import sys, json
@@ -54,14 +62,18 @@ except Exception as e:
 #!/bin/bash
 # 批量派发：把所有 W 档子任务一次性并行跑完
 set -u
-cd "$(dirname "$0")"
+# 不 cd：脚本位置不固定，统一以运行目录（或 $ROOT）为准
 
 # —— 1. 配置（自包含，不要省略）——
-export WEAK_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
-export WEAK_MODEL="glm-5-2-260617"
+# 同样从 .route-state.json 读，别硬编码厂商
+STATE="${STATE:-${ROOT:-$PWD}/.route-state.json}"
+WEAK_BASE_URL=$(grep -m1 '"cheap_endpoint"' "$STATE" | sed 's/.*: *"//; s/".*//')
+WEAK_MODEL=$(grep -m1 '"cheap_model"'       "$STATE" | sed 's/.*: *"//; s/".*//')
+WEAK_PROVIDER=$(grep -m1 '"cheap_provider"' "$STATE" | sed 's/.*: *"//; s/".*//')
+export WEAK_BASE_URL WEAK_MODEL
 export WEAK_NO_THINK=1                      # 关思考，省 88% token
-if [ -z "${ARK_API_KEY:-}" ]; then          # 桌面端读不到 shell 变量时回退
-  ARK_API_KEY=$(grep -A5 'model_providers.volcengine' "$HOME/.codex/config.toml" \
+if [ -z "${WEAK_API_KEY:-}" ]; then         # 桌面端读不到 shell 变量时回退
+  WEAK_API_KEY=$(grep -A5 "model_providers.$WEAK_PROVIDER" "$HOME/.codex/config.toml" \
     | grep 'experimental_bearer_token' | sed 's/.*= *"//; s/"$//')
 fi
 
@@ -76,7 +88,7 @@ if os.environ.get('WEAK_NO_THINK'):
 print(json.dumps(p))
 ") || return 1
   curl -sS --max-time 60 "$WEAK_BASE_URL/chat/completions" \
-    -H "Authorization: Bearer $ARK_API_KEY" \
+    -H "Authorization: Bearer $WEAK_API_KEY" \
     -H "Content-Type: application/json" -d "$payload" \
   | python3 -c "
 import sys, json

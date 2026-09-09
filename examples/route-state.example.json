@@ -7,5 +7,6 @@
   "cheap_endpoint": "https://ark.cn-beijing.volces.com/api/v3",
   "cheap_no_think": true,
   "mid_model": null,
-  "last_updated": "2026-09-09"
+  "last_updated": "2026-09-09",
+  "cheap_provider": "volcengine"
 }

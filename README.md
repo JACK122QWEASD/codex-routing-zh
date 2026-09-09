@@ -55,6 +55,18 @@
 
 ---
 
+## 环境要求
+
+| 项 | 要求 |
+|---|---|
+| Codex | 桌面端或 CLI（**0.122+**，此版本起只支持 Responses 协议） |
+| 系统 | 脚本用了 `grep` / `sed` / `chmod`，需 Unix 环境（macOS / Linux）。Windows 请走 WSL |
+| Python | 3.7+（只用于拼 JSON，**不依赖 tomllib**） |
+| Node | 可选，用于 `node --check` / `node --test` 做校验 |
+| 弱模型 | 任意提供 Chat Completions 的厂商（火山方舟 / DeepSeek / 智谱 / 百炼…都行） |
+
+> 项目里的模型名、端点都是**示例值**，换成你自己的即可，规则本身与厂商无关。
+
 ## 快速开始
 
 ### 1. 安装
